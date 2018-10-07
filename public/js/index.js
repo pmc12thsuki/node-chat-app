@@ -2,6 +2,25 @@
 
 const socket = io();
 
+
+// a autoScrolling function
+function scrollToButtom(){
+    //selectors
+    const messages = $('#messages');
+    const newMessage = messages.children('li:last-child');
+    //heights
+    const clientHeight = messages.prop('clientHeight');
+    const scrollTop = messages.prop('scrollTop');
+    const scrollHeight = messages.prop('scrollHeight');
+    const newMessageHeight = newMessage.innerHeight();
+    const lastMessageHeight = newMessage.prev().innerHeight();
+
+    if(clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight){
+        // should scroll
+        messages.scrollTop(scrollHeight);
+    }
+}
+
 socket.on('connect',()=>{
     console.log('connect to server');
 })
@@ -20,8 +39,8 @@ socket.on('newMessage', msg=>{
         from: msg.from,
         createdAt: formattedTime
     });
-
     $('#messages').append(html);
+    scrollToButtom();
 })
 
 // receive a new location message from server
@@ -34,6 +53,7 @@ socket.on('newLocationMessage', msg=>{
         createdAt: formattedTime
     })
     $('#messages').append(html);
+    scrollToButtom();
 });
 
 // send a message to server
