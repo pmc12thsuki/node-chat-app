@@ -22,11 +22,25 @@ function scrollToButtom(){
 }
 
 socket.on('connect',()=>{
-    console.log('connect to server');
+    const params = jQuery.deparam(window.location.search);
+    socket.emit('join', params, function(err){
+        if(err){
+            alert(err);
+            window.location.href = '/';
+        }
+    })
 })
 
 socket.on('disconnect', ()=>{
     console.log('disconnected from server');
+})
+
+socket.on('updateUserList', users=>{
+    const ol = $('<ol></ol>');
+    users.forEach(user=>{
+        ol.append($('<li></li>').text(user));
+    })
+    $('#users').html(ol);
 })
 
 // receive a new message from server
