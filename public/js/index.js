@@ -12,21 +12,28 @@ socket.on('disconnect', ()=>{
 
 // receive a new message from server
 socket.on('newMessage', msg=>{
+    // use mustache template to render message
     const formattedTime = moment(msg.createdAt).format('h:mm a');
-    const li = $('<li></li>');
-    li.text(`${msg.from} ${formattedTime}: ${msg.text}`);
-    $('#messages').append(li);
+    const template = $('#message-template').html();
+    const html = Mustache.render(template, {
+        text: msg.text,
+        from: msg.from,
+        createdAt: formattedTime
+    });
+
+    $('#messages').append(html);
 })
 
 // receive a new location message from server
 socket.on('newLocationMessage', msg=>{
     const formattedTime = moment(msg.createdAt).format('h:mm a');
-    const li = $('<li></li>');
-    const a = $('<a target="_blank">My current location</a>');
-    li.text(`${msg.from} ${formattedTime}: `);
-    a.attr('href', msg.url);
-    li.append(a);
-    $('#messages').append(li);
+    const template = $("#location-message-template").html();
+    const html = Mustache.render(template,{
+        url: msg.url,
+        from: msg.from,
+        createdAt: formattedTime
+    })
+    $('#messages').append(html);
 });
 
 // send a message to server
