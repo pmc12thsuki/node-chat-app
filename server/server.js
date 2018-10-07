@@ -11,6 +11,7 @@ const PORT = process.env.PORT || '3000';
 const app = express();
 const server = http.createServer(app); // instead of create server by express, create a server using http (express use this too behind the scence)
 const io = socketIO(server); // return a socketIO server
+const generateMessage = require('./utlis/message');
 
 // reutrn the html file
 app.use(express.static(publicPath));
@@ -19,15 +20,26 @@ app.use(express.static(publicPath));
 io.on('connection', (socket)=>{
     console.log(`new user connected`);
 
+    // welcome the user
+    socket.emit('newMessage',generateMessage('Admin', 'Welcome to the chat app')); // will send to the specific user
+
+    // tell other people somebody joined the app
+    socket.broadcast.emit('newMessage',generateMessage('Admin', 'New use joined')); // will send to everybody but this socket itself
+
+    
     socket.on('createMessage', msg=>{ // once we receive an createMessage events from server
         console.log('new message', msg);
         // socket.emit emits an event to single connection (single client)
+
         // io.emit emits an event to every single connection (every client)
-        io.emit('newMessage',{
-            from: msg.from,
-            text: msg.text,
-            createdAt: new Date().getTime()
-        })
+        io.emit('newMessage',generateMessage(msg.from, msg.text));
+
+        // broadcast will send the event to everybody but this socket itself
+        // socket.broadcast.emit('newMessage',{
+        //         from: msg.from,
+        //         text: msg.text,
+        //         createdAt: new Date().getTime()
+        // })
     })
 
     socket.on('disconnect', ()=>{
